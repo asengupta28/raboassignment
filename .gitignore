@@ -1,6 +1,7 @@
 mvnw
 mvnw.cmd
 *.txt
+*.exe
 *.class
 *.jar
 *.zip
