@@ -1,0 +1,10 @@
+mvnw
+mvnw.cmd
+*.txt
+*.class
+*.jar
+*.zip
+*.ppk
+*.pem
+.mvn
+target
