@@ -4,7 +4,7 @@ Github upload:
 
 	***************************
 	GitHub a/c:	asengupta28@hotmail.com/ Putki1508@)!$
-	Token: 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
+	Token: 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
 	***************************
 
 	- create file ".gitignore" with texts below:
