@@ -2,6 +2,11 @@
 Github upload:
 =============
 
+	***************************
+	GitHub a/c:	asengupta28@hotmail.com/ Putki1508@)!$
+	Token: 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
+	***************************
+
 	- create file ".gitignore" with texts below:
 		mvnw
 		mvnw.cmd
@@ -49,9 +54,11 @@ Github upload:
 		git init -b main
 		git add .
 		git commit -m "First commit"
-		git remote add origin https://github.com/asengupta28/raboassignment
-		git remote -v
+		git remote add origin https://github.com/asengupta28/raboassignment.git
+		git branch -M main
+			git remote -v
 		git push origin master
+			git push -u origin main
 
 
 
