@@ -1,110 +1,39 @@
 
-Github upload:
-=============
-
-	***************************
-	GitHub a/c:	asengupta28@hotmail.com/ Putki1508@)!$
-	Token: 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
-	***************************
-
-	- create file ".gitignore" with texts below:
-		mvnw
-		mvnw.cmd
-		*.txt
-		*.class
-		*.jar
-		*.zip
-		.mvn
-		target
-
-	- create file "buildspec.yml" with texts below:
-		version: 0.2
-
-		phases:
-		  install:
-			runtime-versions:
-			  java: corretto11
-		  pre_build:
-			commands:
-			  - echo Nothing to do in the pre_build phase...
-		  build:
-			commands:
-			  - echo Build started on `date`
-			  - mvn install
-		  post_build:
-			commands:
-			  - echo Build completed on `date`
-		artifacts:
-		  files:
-			- target/springboot-jpa-redis-cache-0.0.1-SNAPSHOT.jar
-
-	- create file "appspec.yml" with texts below:
-		version: 0.0
-		os: linux
-		files:
-		  - source: ./rabobank.jparediscache-0.0.1-SNAPSHOT.jar
-			destination: /tmp
-
-	- Open project folder and enter commands as below:
-		cd E:\Avijit\lanosrep\Applications\Rabo Bank - Assignment
-
-		git config --global core.excludesfile ~/.gitignore_global
-
-		echo "# Rabo Bank assignment" >> README.md
-		git init -b main
-		git add .
-		git commit -m "First commit"
-		git remote add origin https://github.com/asengupta28/raboassignment.git
-		git branch -M main
-			git remote -v
-		git push origin master
-			git push -u origin main
-
-
-
-	============================================================================================
-
-Sample URLs:
-===========
-
-	Get All:
-		http://localhost:8080/customers/
-
-	Get against ID:
-		http://localhost:8080/customers/<ID>
-
-	Insert New:
-		http://localhost:8080/customers/<FName>/<LName>/Age/<Address>
-
-	Update Existing:
-		http://localhost:8080/customers/<ID>/<FName>/<LName>/Age/<Address>
-
-	Delete Existing:
-		http://localhost:8080/customers/<ID>
-
-
-	===================================================================================
-
-
-I. Run on WINDOWS:
-   =================
-
-	00.	To build JAR file:
-		- .\mvnw package
-	01.	To compile only:
-		- .\mvnw compile
-	02.	To Build and Run:
-		- .\mvnw spring-boot:run
+	I. Run on WINDOWS:
+    =================
 
 	1.	Start Redis server:
-		- E:\Redis2.4.5>redis-server.exe
+		- Download & Intall Redis distribution
+		- Open a DOS Command prompt
+		- Goto <REDIS-INSTALL-FOLDER>
+			- cd <REDIS-INSTALL-FOLDER>
+			Ex:
+				- cd E:\Redis2.4.5
+		- Use command to start:
+			redis-server.exe
+			Ex:
+				- E:\Redis2.4.5\redis-server.exe
 
 	2.	Start MySQL:
-		- Iniatilize: mysqld --initialize-insecure
-		- Start Server: mysqld.exe -u root --console --standalone [--debug]
-		- Check port: netstat -ano | findstr 3306
+		- Download & Install MySQL Server distribution
+		- Open a DOS Command prompt
+		- Goto <MySQL-INSTALL-FOLDER>\bin
+			- cd <MySQL-INSTALL-FOLDER>\bin
+			Ex:
+				- cd E:\mysql-8.0.26-winx64\bin
+		- Use commands as below:
+			Iniatilize: mysqld --initialize-insecure
+			Start Server: mysqld.exe -u root --console --standalone [--debug]
+			***** This will start MySQL atabase server on default port (3306)
+		- Open a DOS command prompt and use command below to check MySQL port:
+			netstat -ano | findstr 3306
 
 	3.	Setup database:
+		- Open a DOS Command prompt
+		- Goto <MySQL-INSTALL-FOLDER>\bin
+			- cd <MySQL-INSTALL-FOLDER>\bin
+			Ex:
+				- cd E:\mysql-8.0.26-winx64\bin
 		- Connect to Client CLI:
 			- MySQL --user root
 
@@ -134,26 +63,42 @@ I. Run on WINDOWS:
 			- SHOW TABLES;
 			- DESCRIBE customer;
 
-		- Add sample data as below:
+		- If you want initial Customer data in the table use commands as below:
 			INSERT INTO customer (id,first_name,last_name,age,address) values(1001, 'Abhijit', 'Sengupta', 40, 'INDIA');
 			INSERT INTO customer (id,first_name,last_name,age,address) values(1002, 'Shauvik', 'Baksi', 40, 'NETHERLANDS');
-			INSERT INTO customer (id,first_name,last_name,age,address) values(1003, 'Saunak', 'XXXXX', 40, 'NETHERLANDS');
-			INSERT INTO customer (id,first_name,last_name,age,address) values(1004, 'XXXXX', 'YYYYY', 40, 'NETHERLANDS');
 			COMMIT;
 
 		- Check sample data added as below:
 			- SELECT * FROM customer;
 
 	4.	Run application:
-		- java -jar springboot-jpa-redis-cache-0.0.1-SNAPSHOT.jar
-		- Open browser:
-		- Retrieve all Customers:
-			- http://localhost:8080/customers/
-		- Retrieve by ID:
-			- http://localhost:8080/customers/<ID>
+			- build application:
+				- <APACHE-MAVEN-INSTALL-FOLDER>/bin/mvn spring:boot-run
+			OR
+			- build application package
+				- <APACHE-MAVEN-INSTALL-FOLDER>/bin/mvn package
+				- check under generated "target" folder for the generated ".JAR" file
+				- java -jar springboot-jpa-redis-cache-0.0.1-SNAPSHOT.jar
 
-	5.	Shutdown MySQL Server
-		- mysqladmin.exe --user root shutdown
+			*** - The Application runs on Port 8080
+
+	5.	Open a Browser:
+		- run URLS as below:
+		- Get All Customers:
+			http://localhost:8080/customers/
+		- Get a Customer against an ID:
+			http://localhost:8080/customers/<ID>
+		Insert a New Customer:
+			http://localhost:8080/customers/<Fist Name>/<Last Name>/Age/<Address>
+		Update an Existing Customer:
+			http://localhost:8080/customers/<ID>/<First Name>/<Last Name>/Age/<Address>
+		Delete an Existing Cutomer:
+			http://localhost:8080/customers/<ID>
+
+	6.	Shutdown all:
+		- CTRL + C at the Application pompt
+		- CTRL + C at the Redis server
+		- Goto <MySQL-INSTALL-FOLDER>\bin and use command: mysqladmin.exe --user root shutdown
 
 ==================================================================================================================
 
@@ -189,13 +134,12 @@ II. Run On DOCKER:
 
 				ALTER TABLE customer AUTO_INCREMENT=1000;
 
+			- If you want initial Customer data in the table use commands as below:
 				INSERT INTO customer (id,first_name,last_name,age,address) values(1001, 'Abhijit', 'Sengupta', 40, 'INDIA');
 				INSERT INTO customer (id,first_name,last_name,age,address) values(1002, 'Shauvik', 'Baksi', 40, 'NETHERLANDS');
-				INSERT INTO customer (id,first_name,last_name,age,address) values(1003, 'Saunak', 'XXXXX', 40, 'NETHERLANDS');
-				INSERT INTO customer (id,first_name,last_name,age,address) values(1004, 'XXXXX', 'YYYYY', 40, 'NETHERLANDS');
-				INSERT INTO customer (first_name,last_name,age,address) values('AAAA', 'BBBB', 99, 'XYZ');
 				COMMIT;
 
+			- Check sample data added as below:
 				SELECT * FROM customer;
 
 	3. Setp Redis [standalone]:
@@ -219,17 +163,54 @@ II. Run On DOCKER:
 					- check "IPv4Address": under above section
 
 	4. Setup SpringBoot Application:
-		- Goto folder with source code
-		- build package:
+		- Download & Install Apache Maven
+
+		- Download Source code from GitHub:
+			- use command: git clone https://github.com/asengupta28/raboassignment.git
+			or 
+			- download as: https://github.com/asengupta28/raboassignment/archive/refs/heads/main.zip
+			- then UNZIP into a required folder
+
+		- Use command as below:
+			- set JAVA_HOME=<JDK 11-INSTALL-FOLDER>
+
+		- build application:
 			- <APACHE-MAVEN-INSTALL-FOLDER>/bin/mvn package
-		- check generated ".JAR" file under "./target"
+			- check generated ".JAR" file under "./target"
 		- Goto folder to create dockerfile:
 		- copy the generated .JAR file to current folder
-		- vi dockerfile
-		- add content as below:
-			FROM openjdk:11
-			COPY ./springboot-jpa-redis-cache-0.0.1-SNAPSHOT.jar springboot-jpa-redis-cache-0.0.1-SNAPSHOT.jar
-			CMD ["java","-jar","springboot-jpa-redis-cache-0.0.1-SNAPSHOT.jar"]
-		- build & run Docker Image:
-			- docker image build -t springbootjparediscache .
-			- docker container run --network rabo-net-springjpamysqlredis --name rabo-springbootjparediscache -p 8080:8080 -d springbootjparediscache
+
+		***** - Dockerize the application JAR file:
+			- vi dockerfile
+			- add content as below:
+				FROM openjdk:11
+				COPY ./springboot-jpa-redis-cache-0.0.1-SNAPSHOT.jar springboot-jpa-redis-cache-0.0.1-SNAPSHOT.jar
+				CMD ["java","-jar","springboot-jpa-redis-cache-0.0.1-SNAPSHOT.jar"]
+			- build & run Docker Image:
+				- docker image build -t springbootjparediscache .
+				- docker container run --network rabo-net-springjpamysqlredis --name rabo-springbootjparediscache -p 8080:8080 -d springbootjparediscache
+
+		*** - The Application runs on Port 8080
+
+	5.	Open a Browser:
+		- run URLS as below:
+		- Get All Customers:
+			http://localhost:8080/customers/
+		- Get a Customer against an ID:
+			http://localhost:8080/customers/<ID>
+		Insert a New Customer:
+			http://localhost:8080/customers/<Fist Name>/<Last Name>/Age/<Address>
+		Update an Existing Customer:
+			http://localhost:8080/customers/<ID>/<First Name>/<Last Name>/Age/<Address>
+		Delete an Existing Cutomer:
+			http://localhost:8080/customers/<ID>
+
+
+	6.	Shutdown all:
+		- docker container ls
+		- check container IDs for "rabo-springbootjparediscache", "rabo-redis" and "rabo-mysql"
+		- Use command: docker container stop <CONTAINER-ID-FOR-rabo-springbootjparediscache>
+		- Use command: docker container stop <CONTAINER-ID-FOR-rabo-rabo-redis>
+		- Use command: docker container stop <CONTAINER-ID-FOR-rabo-rabo-mysql>
+
+==================================================================================================================================================
