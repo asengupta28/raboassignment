@@ -19,10 +19,8 @@ import com.rabobank.jparediscache.CustomerNotFoundException;
 import com.rabobank.jparediscache.Customer;
 import com.rabobank.jparediscache.CustomerRepository;
 
-
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
 
 @RestController
 @RequestMapping("customers")
