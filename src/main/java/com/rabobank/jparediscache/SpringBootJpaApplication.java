@@ -14,7 +14,7 @@ public class SpringBootJpaApplication
 {
 	private final CustomerRepository repository;
 
-	@Autowired
+	@Autowire
 	public SpringBootJpaApplication(CustomerRepository repository) {this.repository = repository;}
 
 	public static void main(String[] args)
