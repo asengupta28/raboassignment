@@ -33,77 +33,101 @@ public class RaboController
 
     @Cacheable(value = "customers")
 	@GetMapping
-	public Iterable<Customer> getCustomers() {return repository.findAll();}	
-
-    @Cacheable(value = "customers", key = "#id")
-	@GetMapping("{id}")
-	public Customer getCustomer(@PathVariable Long id) {return repository.findById(id).orElseThrow(CustomerNotFoundException::new);}
-
-    @CacheEvict(value = "customers", allEntries=true)
-	@PostMapping
-	public Customer addCustomer(@RequestBody Customer customer) {return repository.save(customer);}
-
-
-    @CacheEvict(value = "customers", allEntries=true)
-    @RequestMapping(value = "/{firstName}/{lastName}/{age}/{address}", method = RequestMethod.GET)
-	public ResponseEntity<?> /* Customer */ getSaveCustomer(@PathVariable String firstName, @PathVariable String lastName, @PathVariable String age, @PathVariable String address)
+	public Iterable<Customer> getCustomers()
 	{
-		System.out.println("Save Customer called: " + firstName + " " + lastName + " " + age + " " + address);
+		System.out.println("Get All Customers"); 
+		return (repository.findAll());
+	}
+
+	@Cacheable(value = "customers", key = "#id")
+	@GetMapping("{id}")
+	public Customer getCustomer(@PathVariable Long id)
+	{
+		System.out.println("Get Customer by Id [" + id + "]"); 
+		//try
+		{
+			return (repository.findById(id).orElseThrow(CustomerNotFoundException::new));
+		}
+/* 		catch(Exception ex)
+		{
+			ex.printStackTrace();
+			return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		} */
+	}
+
+	@CacheEvict(value = "customers", allEntries=true)
+	@PostMapping
+	public ResponseEntity<?> addCustomer(@RequestBody Customer customer)
+	{
+		System.out.println("Insert Customer : " + customer.getFirstName() + " " + customer.getLastName() + " " + 
+							customer.getAge() + " " + customer.getAddress());
+		try
+		{
+			return new ResponseEntity<>(repository.save(customer), HttpStatus.OK);
+		}
+		catch(Exception ex)
+		{
+			ex.printStackTrace();
+			return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+	}
+
+	@CacheEvict(value = "customers", allEntries=true)
+    @RequestMapping(value = "/{firstName}/{lastName}/{age}/{address}", method = RequestMethod.GET)
+	public ResponseEntity<?> getSaveCustomer(@PathVariable String firstName, @PathVariable String lastName, @PathVariable String age, @PathVariable String address)
+	{
+		System.out.println("Insert Customer : " + firstName + " " + lastName + " " + age + " " + address);
 
 		try
 		{
-			Customer customerToSave = new Customer();
-			customerToSave.setFirstName(firstName);
-			customerToSave.setLastName(lastName);
-			customerToSave.setAge(Integer.valueOf(age));
-			customerToSave.setAddress(address);
-
-			System.out.println("Saved Customer successfully.");
-			//return new ResponseEntity<>(repository.save(customerToSave), HttpStatus.OK);
+			Customer customerToSave = Customer.builder()
+				.firstName(firstName).lastName(lastName).age((int)Integer.valueOf(age)).address(address).build();
 			Customer newCustomer = repository.save(customerToSave);
-			return new ResponseEntity<>(newCustomer.getId(), HttpStatus.OK);
+			System.out.println("Saved Customer successfully. " + newCustomer);
+
+			return new ResponseEntity<>(newCustomer, HttpStatus.OK);
 		}
-		catch(Exception ex) {return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);}
+		catch(Exception ex) {return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);}
 	}
 
 
-    //@CachePut(value = "customers", key = "#id")
-    @CacheEvict(value = "customers", allEntries=true)
+	//@CachePut(value = "customers", key = "#id")
+	@CacheEvict(value = "customers", allEntries=true)
 	@PutMapping("{id}")
-	public ResponseEntity<?> /* Customer */ updateCustomer(@PathVariable Long id, @RequestBody Customer customer)
+	public ResponseEntity<?> updateCustomer(@PathVariable Long id, @RequestBody String address)
 	{
+		System.out.println("Update Customer: Id [" + id + "] Address [" + address + "]");
 		try
 		{
 			Customer customerToUpdate = repository.findById(id).orElseThrow(CustomerNotFoundException::new);
-			customerToUpdate.setFirstName(customer.getFirstName());
-			customerToUpdate.setLastName(customer.getLastName());
-			customerToUpdate.setAge(customer.getAge());
-			customerToUpdate.setAddress(customer.getAddress());
+			customerToUpdate.setAddress(address);
+			Customer updatedCustomer = repository.save(customerToUpdate);
+			System.out.println("Updated Customer successfully. " + updatedCustomer);
 
-			System.out.println("Updated Customer successfully.");
-			Customer newCustomer = repository.save(customerToUpdate);
-			return new ResponseEntity<>(newCustomer, HttpStatus.OK);
+			return new ResponseEntity<>(updatedCustomer, HttpStatus.OK);
 		}
-		catch(Exception ex) {return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);}
+		catch(Exception ex) {return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);}
 	}
-
-    //@CachePut(value = "customers", key = "#id")
+	//@CachePut(value = "customers", key = "#id")
     @CacheEvict(value = "customers", allEntries=true)
-    @RequestMapping(value = "/{id}/{firstName}/{lastName}/{age}/{address}", method = RequestMethod.GET)
-	public Customer getUpdateCustomer(@PathVariable Long id, @PathVariable String firstName, @PathVariable String lastName, @PathVariable int age, @PathVariable String address)
+    @RequestMapping(value = "/{id}/{address}", method = RequestMethod.GET)
+	public ResponseEntity<?> getUpdateCustomer(@PathVariable Long id, @PathVariable String address)
 	{
-		System.out.println(id + " " + firstName + " " + lastName + " " + age + " " + address);
+		System.out.println("Update Customer: Id [" + id + "] Address [" + address + "]");
 
-		Customer customerToUpdate = repository.findById(id).orElseThrow(CustomerNotFoundException::new);
-		customerToUpdate.setFirstName(firstName);
-		customerToUpdate.setLastName(lastName);
-		customerToUpdate.setAge(age);
-		customerToUpdate.setAddress(address);
+		try
+		{
+			Customer customerToUpdate = repository.findById(id).orElseThrow(CustomerNotFoundException::new);
+			customerToUpdate.setAddress(address);
+			Customer updatedCustomer = repository.save(customerToUpdate);
+			System.out.println("Updated Customer successfully. " + updatedCustomer);
 
-		return repository.save(customerToUpdate);
+			return new ResponseEntity<>(updatedCustomer, HttpStatus.OK);
+		}
+		catch(Exception ex) {return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);}
 	}
 
-
+/*
     @CacheEvict(value = "customers", allEntries=true)
 	@DeleteMapping("/{id}")
 	public void deleteCustomer(@PathVariable Long id)
@@ -116,7 +140,11 @@ public class RaboController
 	@RequestMapping("delete/{id}")
 	public void getDeleteCustomer(@PathVariable Long id)
 	{
-		repository.findById(id).orElseThrow(CustomerNotFoundException::new);
+		Customer.CustomerBuilder existingCustomer = (repository.findById(id).orElseThrow(CustomerNotFoundException::new)).toBuilder();
+		//Customer customerToUpdate = existingCustomer.address(address).build();
+
+		//repository.findById(id).orElseThrow(CustomerNotFoundException::new);
 		repository.deleteById(id);
+		System.out.println("Customer Deleted successfully.");
 	}
-}
+ */}

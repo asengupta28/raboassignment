@@ -1,49 +1,53 @@
 package com.rabobank.jparediscache;
 
 import javax.persistence.Entity;
+import javax.persistence.Table;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 import java.io.Serializable;
 
-import lombok.Getter;
-import lombok.Setter;
-import lombok.NoArgsConstructor;
+import lombok.Builder;
+import lombok.NonNull;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.NotEmpty;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.Accessors;
 
 @Entity
-@Getter @Setter @NoArgsConstructor
+@Getter
+@Setter
+@Accessors(chain=true)
+@Builder(toBuilder = true)
+@NoArgsConstructor
+@AllArgsConstructor
+//@Table(name = "customer")
+
 public class Customer implements Serializable
 {
-    private static final long serialVersionUID = 7156526077883281623L;
+	private static final long serialVersionUID = 7156526077883281623L;
 
+	//private static long serialVersionUID = 1L;
 	@Id
-	//@GeneratedValue(strategy=GenerationType.AUTO)
-	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long id;
 
+	@NotEmpty(message = "First name is required")
 	private String firstName;
 
+	@NotEmpty(message = "Last name is required")
 	private String lastName;
 
+	@Min(18l)
+	@Max(100l)
 	private int age;
 
+	@NotEmpty(message = "Address is required")
 	private String address;
-
-/* 	public Long getId() {return id;}
-	public void setId(Long id) {this.id = id;}
-
-	public String getFirstName() {return firstName;}
-	public void setFirstName(String firstName) {this.firstName = firstName;}
-
-	public String getLastName() {return lastName;}
-	public void setLastName(String lastName) {this.lastName = lastName;}
-
-	public int getAge() {return age;}
-	public void setAge(int age) {this.age = age;}	
-
-	public String getAddress() {return address;}
-	public void setAddress(String address) {this.address = address;}
-*/
 }

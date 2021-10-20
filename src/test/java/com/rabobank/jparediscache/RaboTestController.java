@@ -45,17 +45,17 @@ public class RaboTestController //extends CustomerStatementProcessorTests
     public static final String RETRIEVE_INTERNAL_SERVER_TEST_PROPERTY_DATA = "INTERNAL_SERVER_ERROR_TEST_DATA";
 
 	@Test
-	public void testGetSaveCustomer() throws Exception
+	public void testGetInsertCustomer() throws Exception
 	{
 		String uri = "/customers/New Customer FName/New Customer LName/55/New Customer Address";
 		MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(uri)).andReturn();
 
 		int status = mvcResult.getResponse().getStatus();
-		assertEquals(HttpStatus.OK.value(), status);
+		System.out.println("Status: " + status);
 		String content = mvcResult.getResponse().getContentAsString();
 		System.out.println("Save Customer called: " + content);
-		//PostProcessingResult response = super.mapFromJson(content, PostProcessingResult.class);
-		assertNotNull(content);	//response.getResult());
+		//assertNotNull(content);	//response.getResult());
+		assertEquals(HttpStatus.OK.value(), status);
 	}
 
  	@Test
