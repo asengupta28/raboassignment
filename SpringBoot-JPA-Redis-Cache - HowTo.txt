@@ -17,7 +17,8 @@
 			- SpringBoot for Rest and JUnit
 			- Mockito for test through WebMvc
 			- MySQL Server as data persitence platform 
-			- Redis Server as a Primary Cache.
+			- Redis Server as a Primary Cache
+			- Zipkin Server for Traceability
 		The How-To instructions will guide to install, setup and configure them
 
 	*****
@@ -330,7 +331,32 @@ I. Run On DOCKER:
 		- Check sample data added as below:
 			- SELECT * FROM customer;
 
-	4.	Run application:
+	4.	Start Zipkin Server:
+		- Download Zipkin distribution .ZAR file
+		- Uncompress the same in a Folder
+		- Open a DOS Command Prompt and goto the Folder
+
+		- Set JAVA Path:
+			- go to command prompt
+			- set JAVA_HOME
+			- set PATH to JAVA-INSTALLATION\bin
+
+		- Start Zipkin:
+			- java -jar zipkin-server-2.12.9-exec.jar
+
+		- Check for success message:
+			- Started Zipkin Server
+			- check for Zipkin port in below message:
+				- Serving HTTP at /0:0:0:0:0:0:0:0:<HOST-PORT> - http://<HOST-IP>:<HOST-PORT>/
+
+		- Test API call Traces:
+			- build & run ProducerApp
+			- build & run ConsumerApp
+			- run ConsumerApp URL [see, How To.txt under Consumer App folder]
+			- Open Zipkin URL: http://127.0.0.1:9411/
+				- Click "Find Traces"
+
+	5.	Run application:
 			- build application:
 				- <APACHE-MAVEN-INSTALL-FOLDER>/bin/mvn spring:boot-run
 			OR
@@ -341,7 +367,7 @@ I. Run On DOCKER:
 
 	***** - The Application runs on Port 8080
 
-	5.	Open a Browser:
+	6.	Open a Browser:
 		- run URLS as below:
 		- Get All Customers:
 			http://<HOST-IP>:8080/customers/
@@ -354,10 +380,10 @@ I. Run On DOCKER:
 		Delete an Existing Cutomer:
 			http://<HOST-IP>:8080/customers/<ID>
 
-	6.	Run Maven Test
+	7.	Run Maven Test
 		- .\mvnw test -Dtest=RaboTestController
 
-	7.	Shutdown all:
+	8.	Shutdown all:
 		- CTRL + C at the Application pompt
 		- CTRL + C at the Redis server
 		- Goto <MySQL-INSTALL-FOLDER>\bin and use command: mysqladmin.exe --user root shutdown
