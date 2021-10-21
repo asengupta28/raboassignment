@@ -202,7 +202,12 @@ I. Run On DOCKER:
 				- vi application.properties
 			***** - change contents as below:
 				- replace <MySQL-SERVER-IP> with the "IPv4Address" under section "rabo-mysql" found in Step 4 above
+				- Uncomment the configuration [delete the "#" at the start of the line]
+				- Comment-out the configuration with a "#" at the start of the line "spring.datasource.url=jdbc:mysql://localhost"
+
 				- replace <REDIS-SERVER-IP> with the "IPv4Address" under section "rabo-redis" found in Step 4 above
+				- Uncomment the configuration [delete the "#" at the start of the line]
+				- Comment-out the configuration with a "#" at the start of the line "spring.redis.host=localhost"
 				- save and exit the file
 
 			- Come back to the Application Folder
