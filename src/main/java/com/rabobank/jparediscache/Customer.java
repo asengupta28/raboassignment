@@ -27,13 +27,10 @@ import lombok.experimental.Accessors;
 @Builder(toBuilder = true)
 @NoArgsConstructor
 @AllArgsConstructor
-//@Table(name = "customer")
 
 public class Customer implements Serializable
 {
 	private static final long serialVersionUID = 7156526077883281623L;
-
-	//private static long serialVersionUID = 1L;
 	@Id
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long id;
