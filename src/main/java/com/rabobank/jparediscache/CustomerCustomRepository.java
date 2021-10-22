@@ -6,6 +6,8 @@ import org.springframework.data.repository.CrudRepository;
 
 import com.rabobank.jparediscache.Customer;
 
-public interface CustomerRepository extends CrudRepository<Customer, Long>, CustomerCustomRepository
+public interface CustomerCustomRepository
 {
+	 List<Customer> getCustomerByFirstName(String firstName);
+	 List<Customer> getCustomerByFirstAndLastName(String firstName, String lastName);
 }
