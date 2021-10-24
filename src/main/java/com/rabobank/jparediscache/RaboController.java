@@ -176,7 +176,7 @@ public class RaboController
 	//		Output Type / Details: JSON / Customer ID, First Name, Last Name, Age, Addresss
 	//@CachePut(value = "customers", key = "#id")
 	@CacheEvict(value = "customers", allEntries=true)
-	@PutMapping("/mod/{id}")
+	@PutMapping("/{id}")
 	public ResponseEntity<?> updateCustomer(@PathVariable Long id, @RequestBody String address)
 	{
 		System.out.println("(*** SYSOP ***) Update Customer Address to " + address + " by ID [" + id + "]");
