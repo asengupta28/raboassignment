@@ -252,6 +252,8 @@ I. Run On DOCKER:
 
 	8.	Run Maven Test
 		- .\mvnw test -Dtest=RaboTestController
+		- To generate Maven-Surefire report:
+			- .\mvnw surefire-report:report
 
 	9.	Shutdown all:
 		- docker container ls
@@ -386,6 +388,8 @@ I. Run On DOCKER:
 
 	7.	Run Maven Test
 		- .\mvnw test -Dtest=RaboTestController
+		- To generate Maven-Surefire report:
+			- .\mvnw surefire-report:report
 
 	8.	Shutdown all:
 		- CTRL + C at the Application pompt
