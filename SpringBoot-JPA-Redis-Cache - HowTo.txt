@@ -1,0 +1,395 @@
+
+****************************************
+****************************************
+
+	*****
+	Pre-Requisites:
+	==============
+		This Application assumes the below softwares availability in the system:
+			- Docker is up and running
+			- Java 11 is installed and current active in the system and is in working condition
+			- Apache Maven 3 or above is installed in the system and is in working condition
+
+	*****
+	Dependencies:
+	============
+		This Application uses below mentioned libraries and platforms:
+			- SpringBoot for Rest and JUnit
+			- Mockito for test through WebMvc
+			- MySQL Server as data persitence platform 
+			- Redis Server as a Primary Cache
+			- Zipkin Server for Traceability
+		The How-To instructions will guide to install, setup and configure them
+
+	*****
+	Platform:
+	============
+		This Application primarily target Docker platform and conatainerization of Application, MySQL database and Redis cache
+		But it also provides instructions for running the same on Windows OS
+		The instructions follows:
+			- I. Run On DOCKER:
+			- II. Run On WINDOWS:
+
+****************************************
+****************************************
+
+	==================================================================================================================================================
+
+I. Run On DOCKER:
+   ==============
+
+	1. Create Docker Bridge NETWORK:
+		- docker network create rabo-net-springjpamysqlredis
+
+	2 Setup MySQL:
+		- create a folder with name MySQL
+			- mkdir MySQL
+		- Goto folder MySQL
+			- cd MySQL
+		- Pull Docker image:
+			- docker pull mysql/mysql-server:latest
+		- Start MySQL Docker container:
+			- docker run --name rabo-mysql --network rabo-net-springjpamysqlredis -e MYSQL_ROOT_PASSWORD=root -d mysql/mysql-server:latest
+		- check container logs to ensure MySQL server us up & running:
+			- docker container logs -f rabo-mysql
+
+		- Setup MySQL database for SpringBoot application:
+			- connect to MySQL:
+				- docker exec -it rabo-mysql mysql -uroot -p'root'
+			- run SQL commands as below:
+				CREATE DATABASE rabo_db; -- Creates the  database
+				SHOW DATABASES;
+				CREATE USER 'rabouser'@'%' identified by 'rabopass'; -- Creates the user
+				GRANT ALL ON rabo_db.* TO 'rabouser'@'%'; -- Grants all privileges to the new user on the database
+				QUIT;
+
+		- Re-login to MySQL with Username and Password created above:
+			- docker exec -it rabo-mysql mysql -urabouser -p'rabopass'
+
+		- Finish the Database setup:
+			- run SQL commands as below:
+				USE rabo_db;
+
+				CREATE TABLE customer
+				(
+					id bigint NOT NULL AUTO_INCREMENT,
+					first_name varchar(255) NOT NULL,
+					last_name varchar(255) NOT NULL,
+					age int NOT NULL,
+					address varchar(255) NOT NULL,
+					PRIMARY KEY ( id )
+				);
+
+				ALTER TABLE customer AUTO_INCREMENT=1000;
+
+			- If you want initial Customer data in the table use commands as below:
+				INSERT INTO customer (id,first_name,last_name,age,address) values(1001, 'Abhijit', 'Sengupta', 40, 'INDIA');
+				INSERT INTO customer (id,first_name,last_name,age,address) values(1002, 'Shauvik', 'Baksi', 40, 'NETHERLANDS');
+				COMMIT;
+
+			- Check sample data added as below:
+				SELECT * FROM customer;
+
+			- Exit Database:
+				- QUIT;
+
+	3. Setp Redis [standalone]:
+		- Come out of folder "MySQL"
+			- cd ../
+		- create a folder with name MySQL
+			- mkdir REDIS
+		- Goto folder REDIS
+			- cd REDIS
+
+		- Pull Docker image:
+			- docker pull redis
+
+		- create a file with name redis.conf
+			- vi redis.conf
+		- Add contents as below:
+			#protected-mode yes
+			port 6379
+			tcp-backlog 511
+			timeout 0
+			tcp-keepalive 300
+
+		- Create Redis container:
+			- create a dockerfile:
+				- vi dockerfile
+			- Add contents as below and save / exit:
+				FROM redis
+				COPY redis.conf /usr/local/etc/redis/redis.conf
+				CMD [ "redis-server", "/usr/local/etc/redis/redis.conf" ]
+			- Save & Exit
+
+		- Start Redis container:
+			- docker container stop rabo-redis
+			- docker container rm rabo-redis
+			- docker run --name rabo-redis --network rabo-net-springjpamysqlredis -dp 6379:6379 redis redis-server
+
+		- check if Redis server is up & running:
+			- sudo netstat -pln | grep 6379
+			- docker container logs -f rabo-redis
+			- CTRL + C to exit logs
+		- check CLI:
+			- sudo docker exec -it rabo-redis sh
+				- Enter "redis-cli" at the prompt and enter
+				- Enter ping or PING and enter
+					- check output: "PONG"
+					- quit
+				- exit
+
+	4.	Inspect the Docker Bridge NETWORK for Redis and MySQL IPs
+		- docker inspect rabo-net-springjpamysqlredis
+			- check for section "Name": "rabo-mysql"
+				- note the "IPv4Address": under above section
+				Ex:
+					172.18.0.2/16
+				*** Just Note the IP and not the Netmask [copy before the "/" sign]
+				Ex:
+					172.18.0.2
+			- check for section "Name": "rabo-redis"
+				- note the "IPv4Address": under above section
+				Ex:
+					172.18.0.3/16
+				*** Just Note the IP and not the Netmask [copy before the "/" sign]
+				Ex:
+					172.18.0.3
+				*** Just Note the IP and not the Netmask [copy before the "/" sign]
+
+	5. Setup SpringBoot Application:
+		- Install JDK-11
+		- check JDK-11 is currently active in the system
+			- sudo alternatives --config java
+
+		- Download & Install Apache Maven
+
+		- Come out of folder "REDIS"
+			- cd ../
+		- create a folder with name RaboCustomer
+			- mkdir RaboCustomer
+		- Goto folder RaboCustomer
+			- cd RaboCustomer
+
+		- Download Source code from GitHub:
+			- if git runtime is available
+				- git clone https://github.com/asengupta28/raboassignment.git
+			or 
+			- wget https://github.com/asengupta28/raboassignment/archive/refs/heads/main.zip
+			- check whether "main.zip" has been successfully downloaded and exists in current folder
+				- ls
+			- then UNZIP the main.zip file:
+				- unzip main.zip
+				- this will create folder name "raboassignment-main" after the UNZIP is finished successfully
+				- ls
+			Goto the Application Folder
+				- cd raboassignment-main
+			- Check that it contains below elements:
+				- ls
+					appspec.yml  
+					buildspec.yml  
+					pom.xml  
+					README.md  
+					SpringBoot-JPA-Redis-Cache - HowTo.txt  
+					src
+
+		- Build application:
+			- Goto "raboassignment-main"
+				- cd raboassignment-main
+			- Goto folder "src/main/resources"
+				- cd src/main/resources
+			- open the file "application.properties"
+				- vi application.properties
+			***** - change contents as below:
+				- replace <MySQL-SERVER-IP> with the "IPv4Address" under section "rabo-mysql" found in Step 4 above
+				- Uncomment the configuration [delete the "#" at the start of the line]
+
+				- replace <REDIS-SERVER-IP> with the "IPv4Address" under section "rabo-redis" found in Step 4 above
+				- Uncomment the configuration [delete the "#" at the start of the line]
+
+				- save and exit the file
+
+			- Come back to the Application Folder
+				- cd ../../../
+				- Check the promt shows- "raboassignment-main"
+
+			- Prepare applicaion:
+				- <APACHE-MAVEN-INSTALL-FOLDER>/bin/mvn package
+			- check generated ".JAR" file under "./target" after Maven build is completed successfully
+
+
+	6. ***** Dockerize the application JAR file:
+		- vi dockerfile
+		- add content as below:
+			FROM openjdk:11
+			COPY ./target/springboot-jpa-redis-cache-0.0.1-SNAPSHOT.jar springboot-jpa-redis-cache-0.0.1-SNAPSHOT.jar
+			CMD ["java","-jar","springboot-jpa-redis-cache-0.0.1-SNAPSHOT.jar"]
+		- Save & Exit the file
+
+		- build Docker Application Image:
+			- docker image build -t springbootjparediscache .
+
+		- Start Docker Application  container:
+			- docker container stop rabo-springbootjparediscache
+			- docker container rm rabo-springbootjparediscache
+			- docker container run --network rabo-net-springjpamysqlredis --name rabo-springbootjparediscache -p 8080:8080 springbootjparediscache
+
+	***** - The Application runs on Port 8080
+
+	7.	Test the application:
+		- Open a Browser and run URLS as below:
+		- Get All Customers:
+			http://<HOST-IP>:8080/customers/
+		- Get a Customer against an ID:
+			http://<HOST-IP>:8080/customers/<ID>
+		Insert a New Customer:
+			http://<HOST-IP>:8080/customers/<Fist Name>/<Last Name>/Age/<Address>
+		Update an Existing Customer:
+			http://<HOST-IP>:8080/customers/<ID>/<First Name>/<Last Name>/Age/<Address>
+		Delete an Existing Cutomer:
+			http://<HOST-IP>:8080/customers/<ID>
+
+
+	8.	Run Maven Test
+		- .\mvnw test -Dtest=RaboTestController
+
+	9.	Shutdown all:
+		- docker container ls
+		- check container IDs for "rabo-springbootjparediscache", "rabo-redis" and "rabo-mysql"
+		- Use command: docker container stop <CONTAINER-ID-FOR-rabo-springbootjparediscache>
+		- Use command: docker container stop <CONTAINER-ID-FOR-rabo-rabo-redis>
+		- Use command: docker container stop <CONTAINER-ID-FOR-rabo-rabo-mysql>
+
+
+	==================================================================================================================================================
+
+	II. Run on WINDOWS:
+    ==================
+
+	1.	Start Redis server:
+		- Download & Intall Redis distribution
+		- Open a DOS Command prompt
+		- Goto <REDIS-INSTALL-FOLDER>
+			- cd <REDIS-INSTALL-FOLDER>
+			Ex:
+				- cd E:\Redis2.4.5
+		- Use command to start:
+			redis-server.exe
+			Ex:
+				- E:\Redis2.4.5\redis-server.exe
+
+	2.	Start MySQL:
+		- Download & Install MySQL Server distribution
+		- Open a DOS Command prompt
+		- Goto <MySQL-INSTALL-FOLDER>\bin
+			- cd <MySQL-INSTALL-FOLDER>\bin
+			Ex:
+				- cd E:\mysql-8.0.26-winx64\bin
+		- Use commands as below:
+			Iniatilize: mysqld --initialize-insecure
+			Start Server: mysqld.exe -u root --console --standalone [--debug]
+			***** This will start MySQL atabase server on default port (3306)
+		- Open a DOS command prompt and use command below to check MySQL port:
+			netstat -ano | findstr 3306
+
+	3.	Setup database:
+		- Open a DOS Command prompt
+		- Goto <MySQL-INSTALL-FOLDER>\bin
+			- cd <MySQL-INSTALL-FOLDER>\bin
+			Ex:
+				- cd E:\mysql-8.0.26-winx64\bin
+		- Connect to Client CLI:
+			- MySQL --user root
+
+		- Create Database and User:
+			- Enter commands as below:
+				CREATE DATABASE rabo_db; -- Creates the  database
+				SHOW DATABASES;
+
+				CREATE USER 'rabouser'@'%' identified by 'mypassword'; -- Creates the user
+				GRANT ALL ON rabo_db.* TO 'rabouser'@'%'; -- Grants all privileges to the new user on the database
+				USE rabo_db;
+
+		- Create Table as below:
+			CREATE TABLE customer
+			(
+				id bigint NOT NULL AUTO_INCREMENT,
+				first_name varchar(255) NOT NULL,
+				last_name varchar(255) NOT NULL,
+				age int NOT NULL,
+				address varchar(255) NOT NULL,
+				PRIMARY KEY ( id )
+			);
+
+		- Set AUTO_INCREMENT sequence start base value
+			- ALTER TABLE customer AUTO_INCREMENT=1000;
+		- check table created
+			- SHOW TABLES;
+			- DESCRIBE customer;
+
+		- If you want initial Customer data in the table use commands as below:
+			INSERT INTO customer (id,first_name,last_name,age,address) values(1001, 'Abhijit', 'Sengupta', 40, 'INDIA');
+			INSERT INTO customer (id,first_name,last_name,age,address) values(1002, 'Shauvik', 'Baksi', 40, 'NETHERLANDS');
+			COMMIT;
+
+		- Check sample data added as below:
+			- SELECT * FROM customer;
+
+	4.	Start Zipkin Server:
+		- Download Zipkin distribution .ZAR file
+		- Uncompress the same in a Folder
+		- Open a DOS Command Prompt and goto the Folder
+
+		- Set JAVA Path:
+			- go to command prompt
+			- set JAVA_HOME
+			- set PATH to JAVA-INSTALLATION\bin
+
+		- Start Zipkin:
+			- java -jar zipkin-server-2.12.9-exec.jar
+
+		- Check for success message:
+			- Started Zipkin Server
+			- check for Zipkin port in below message:
+				- Serving HTTP at /0:0:0:0:0:0:0:0:<HOST-PORT> - http://<HOST-IP>:<HOST-PORT>/
+
+		- Test API call Traces:
+			- build & run ProducerApp
+			- build & run ConsumerApp
+			- run ConsumerApp URL [see, How To.txt under Consumer App folder]
+			- Open Zipkin URL: http://127.0.0.1:9411/
+				- Click "Find Traces"
+
+	5.	Run application:
+			- build application:
+				- <APACHE-MAVEN-INSTALL-FOLDER>/bin/mvn spring:boot-run
+			OR
+			- build application package
+				- <APACHE-MAVEN-INSTALL-FOLDER>/bin/mvn package
+				- check under generated "target" folder for the generated ".JAR" file
+				- java -jar springboot-jpa-redis-cache-0.0.1-SNAPSHOT.jar
+
+	***** - The Application runs on Port 8080
+
+	6.	Open a Browser:
+		- run URLS as below:
+		- Get All Customers:
+			http://<HOST-IP>:8080/customers/
+		- Get a Customer against an ID:
+			http://<HOST-IP>:8080/customers/<ID>
+		Insert a New Customer:
+			http://<HOST-IP>:8080/customers/<Fist Name>/<Last Name>/Age/<Address>
+		Update an Existing Customer:
+			http://<HOST-IP>:8080/customers/<ID>/<First Name>/<Last Name>/Age/<Address>
+		Delete an Existing Cutomer:
+			http://<HOST-IP>:8080/customers/<ID>
+
+	7.	Run Maven Test
+		- .\mvnw test -Dtest=RaboTestController
+
+	8.	Shutdown all:
+		- CTRL + C at the Application pompt
+		- CTRL + C at the Redis server
+		- Goto <MySQL-INSTALL-FOLDER>\bin and use command: mysqladmin.exe --user root shutdown
+
+==================================================================================================================
