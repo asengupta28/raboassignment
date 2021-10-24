@@ -147,7 +147,7 @@ public class RaboTestController
 	}
 
  	@Test
-	@Order(7)
+	@Order(6)
 	public void testUpdateCustomer() throws Exception
 	{
 		String uri = "/customers/1118";
