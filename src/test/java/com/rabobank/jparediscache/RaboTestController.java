@@ -3,19 +3,15 @@ package com.rabobank.jparediscache;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
-
-/* import static com.assignment.customer.common.ApplicationConstants.SUCCESSFUL;
-import static com.assignment.customer.common.ApplicationConstants.BAD_REQUEST;
-import static com.assignment.customer.common.ApplicationConstants.DUPLICATE_REFERENCE;
-import static com.assignment.customer.common.ApplicationConstants.DUPLICATE_REFERENCE_INCORRECT_END_BALANCE;
-import static com.assignment.customer.common.ApplicationConstants.INCORRECT_END_BALANCE;
-import static com.assignment.customer.common.ApplicationConstants.INTERNAL_SERVER_ERROR;
- */
-
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.Order;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer.OrderAnnotation;
+
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -23,51 +19,152 @@ import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 
-//import com.assignment.customer.bean.PostProcessingResult;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-public class RaboTestController //extends CustomerStatementProcessorTests
+@TestMethodOrder(OrderAnnotation.class)
+public class RaboTestController
 {
 	@Autowired
 	private MockMvc mockMvc;
 
 	String successfulJson = "";
-
 	String incorrectEndBalanceJson = "";
 
 	public static final String SUCCESSFUL = "SUCCESSFUL";
-    public static final String DUPLICATE_REFERENCE = "DUPLICATE_REFERENCE";
-    public static final String INCORRECT_END_BALANCE = "INCORRECT_END_BALANCE";
-    public static final String DUPLICATE_REFERENCE_INCORRECT_END_BALANCE = "DUPLICATE_REFERENCE_INCORRECT_END_BALANCE";
-    public static final String BAD_REQUEST = "BAD_REQUEST";
     public static final String INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR";
-    public static final String RETRIEVE_INTERNAL_SERVER_TEST_PROPERTY_DATA = "INTERNAL_SERVER_ERROR_TEST_DATA";
 
 	@Test
-	public void testGetInsertCustomer() throws Exception
+	@Order(1)
+	public void testGetAllCustomers() throws Exception
 	{
-		String uri = "/customers/New Customer FName/New Customer LName/55/New Customer Address";
-		MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(uri)).andReturn();
+		String uri = "/customers/";
+		MvcResult mvcResult = null;
+		int status = 500;
+		try
+		{
+			mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(uri)).andReturn();
+		}
+		catch(Exception ex) { System.out.println("RaboTestController: Error on testGetAllCustomers -- " + ex.getMessage()); };
 
-		int status = mvcResult.getResponse().getStatus();
-		System.out.println("Status: " + status);
+		status = mvcResult.getResponse().getStatus();
 		String content = mvcResult.getResponse().getContentAsString();
-		System.out.println("Save Customer called: " + content);
-		//assertNotNull(content);	//response.getResult());
+		System.out.println("GetAllCustomers called: Status [" + status + "] -- " + content);
+
+		assertEquals(HttpStatus.OK.value(), status);
+	}
+
+	@Test
+	@Order(2)
+	public void testInsertCustomer() throws Exception
+	{
+		String uri = "/customers";
+		String insertJson = "{\"firstName\":\"Saunak\",\"lastName\":\"Sinha\",\"age\": \"40\",\"address\":\"NETHERLANDS\"}";
+
+		MvcResult mvcResult = null;
+		int status = 500;
+		try
+		{
+			mvcResult = mockMvc.perform(MockMvcRequestBuilders.post(uri).contentType(MediaType.APPLICATION_JSON_VALUE).content(insertJson)).andReturn();
+		}
+		catch(Exception ex) { System.out.println("RaboTestController: Error on testInsertCustomer -- " + ex.getMessage()); };
+
+		status = mvcResult.getResponse().getStatus();
+		String content = mvcResult.getResponse().getContentAsString();
+		System.out.println("Insert Customer called: Status [" + status + "] -- " + content);
+
+		ObjectMapper objectMapper = new ObjectMapper();
+		com.rabobank.jparediscache.Customer customer = objectMapper.readValue(content, com.rabobank.jparediscache.Customer.class);
+		System.out.println("Customer Inserted: " + customer.toString());
+
+		assertEquals(HttpStatus.OK.value(), status);
+	}
+
+	@Test
+	@Order(3)
+	public void testgetCustomerByID() throws Exception
+	{
+		String uri = "/customers/1115";
+		MvcResult mvcResult = null;
+		int status = 500;
+		try
+		{
+			System.out.println("URI : " + uri);
+			mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(uri)).andReturn();
+		}
+		catch(Exception ex) { System.out.println("RaboTestController: Error on testgetCustomerByID -- " + ex.getMessage()); };
+
+		status = mvcResult.getResponse().getStatus();
+		String content = mvcResult.getResponse().getContentAsString();
+		System.out.println("GetCustomerByID called: Status [" + status + "] -- " + content);
+
+		assertEquals(HttpStatus.OK.value(), status);
+	}
+
+	@Test
+	@Order(4)
+	public void testgetCustomerByFirstName() throws Exception
+	{
+		String uri = "/customers/name/Abhijit";
+		MvcResult mvcResult = null;
+		int status = 500;
+		try
+		{
+			System.out.println("URI : " + uri);
+			mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(uri)).andReturn();
+		}
+		catch(Exception ex) { System.out.println("RaboTestController: Error on testgetCustomerByID -- " + ex.getMessage()); };
+
+		status = mvcResult.getResponse().getStatus();
+		String content = mvcResult.getResponse().getContentAsString();
+		System.out.println("GetCustomerByID called: Status [" + status + "] -- " + content);
+
+		assertEquals(HttpStatus.OK.value(), status);
+	}
+
+	@Test
+	@Order(5)
+	public void testgetCustomerByFirstNameAndLastName() throws Exception
+	{
+		String uri = "/customers/name/Abhijit/Sengupta";
+		MvcResult mvcResult = null;
+		int status = 500;
+		try
+		{
+			System.out.println("URI : " + uri);
+			mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(uri)).andReturn();
+		}
+		catch(Exception ex) { System.out.println("RaboTestController: Error on testgetCustomerByID -- " + ex.getMessage()); };
+
+		status = mvcResult.getResponse().getStatus();
+		String content = mvcResult.getResponse().getContentAsString();
+		System.out.println("GetCustomerByID called: Status [" + status + "] -- " + content);
+
 		assertEquals(HttpStatus.OK.value(), status);
 	}
 
  	@Test
+	@Order(6)
 	public void testUpdateCustomer() throws Exception
 	{
-		String uri = "/customers/1021/New Customer 1/New Customer 1/75/New Customer Address1";
-		MvcResult mvcResult = mockMvc.perform(MockMvcRequestBuilders.get(uri)).andReturn();
+		String uri = "/customers/1118";
+		String updateJson = "Utrecht NETHERLANDS";
 
-		int status = mvcResult.getResponse().getStatus();
-		assertEquals(HttpStatus.OK.value(), status);
+		MvcResult mvcResult = null;
+		int status = 500;
+		try
+		{
+			mvcResult = mockMvc.perform(MockMvcRequestBuilders.put(uri).content(updateJson)).andReturn();
+		}
+		catch(Exception ex) { System.out.println("RaboTestController: Error on testUpdateCustomer -- " + ex.getMessage()); };
+
+		status = mvcResult.getResponse().getStatus();
 		String content = mvcResult.getResponse().getContentAsString();
-		//PostProcessingResult response = super.mapFromJson(content, PostProcessingResult.class);
-		assertNotNull(content);	//response.getResult());
+		System.out.println("UpdateCustomer  called: Status [" + status + "] -- " + content);
+
+		assertEquals(HttpStatus.OK.value(), status);
 	}
 }
