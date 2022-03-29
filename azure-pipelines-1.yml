@@ -19,8 +19,6 @@ pool:
 
 steps:
 - checkout: MyGitHubRepo
-
-steps:
 - task: Maven@3
   displayName: 'Maven pom.xml'
   inputs:
