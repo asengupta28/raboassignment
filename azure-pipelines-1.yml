@@ -8,7 +8,7 @@ resources:
   - repository: MyGitHubRepo # The name used to reference this repository in the checkout step
     type: github
     endpoint: MyGitHubServiceConnection
-    name: MyGitHubOrgOrUser/MyGitHubRepo
+    name: asengupta28/raboassignment
 
 trigger:
 - main
@@ -18,10 +18,23 @@ pool:
   demands: maven
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
+- task: Maven@3
+  displayName: 'Maven pom.xml'
+  inputs:
+    mavenPomFile: '$(Parameters.mavenPOMFile)'
 
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-  displayName: 'Run a multi-line script'
+- task: CopyFiles@2
+  displayName: 'Copy Files to: $(BUILD_TARGETDIRECTORY)'
+  inputs:
+    SourceFolder: '$(system.defaultworkingdirectory)'
+    Contents: '**/*.jar'
+    TargetFolder: '$(BUILD_TARGETDIRECTORY)'
+  condition: succeededOrFailed()
+
+- task: PublishBuildArtifacts@1
+  displayName: 'Publish Artifact: drop'
+  inputs:
+    PathtoPublish: '$(build.artifactstagingdirectory)'
+    publishLocation: FilePath
+    TargetPath: 'E:\Avijit\lanosrep\erawtfoS\Azure Pipeline\win-agent'
+  condition: succeededOrFailed()
