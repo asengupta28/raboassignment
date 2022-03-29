@@ -5,7 +5,7 @@
 
 resources:
   repositories:
-  - repository: https://github.com/asengupta28/raboassignment # The name used to reference this repository in the checkout step
+  - repository: MyGitHubRepo # The name used to reference this repository in the checkout step
     type: github
     endpoint: https://github.com/asengupta28/raboassignment
     name: asengupta28/raboassignment
