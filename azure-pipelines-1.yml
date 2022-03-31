@@ -24,11 +24,18 @@ variables:
 
 steps:
 - checkout: MyGitHubRepo
-- task: Maven@3
+- task: Maven@4
   displayName: 'Maven pom.xml'
   inputs:
     mavenPomFile: 'pom.xml'
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
+
+- task: PublishCodeCoverageResults@3
+  inputs:
+    codeCoverageTool: "JaCoCo"
+    summaryFileLocation: "$(System.DefaultWorkingDirectory)/**/site/jacoco/jacoco.xml"
+    reportDirectory: "$(System.DefaultWorkingDirectory)/**/site/jacoco"
+    failIfCoverageEmpty: true
 
 - task: CopyFiles@2
   displayName: 'Copy Files to: $(BUILD_TARGETDIRECTORY)'
