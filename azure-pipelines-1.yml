@@ -24,13 +24,13 @@ variables:
 
 steps:
 - checkout: MyGitHubRepo
-- task: Maven@4
+- task: Maven@3
   displayName: 'Maven pom.xml'
   inputs:
     mavenPomFile: 'pom.xml'
     testResultsFiles: '**/surefire-reports/TEST-*.xml'
 
-- task: PublishCodeCoverageResults@3
+- task: PublishCodeCoverageResults@1
   inputs:
     codeCoverageTool: "JaCoCo"
     summaryFileLocation: "$(System.DefaultWorkingDirectory)/**/site/jacoco/jacoco.xml"
